@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sprocket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EDEFF2;
+  --card:#FFFFFF;
+  --ink:#14171B;
+  --ink-2:#5C6470;
+  --ink-3:#848C97;
+  --line:#D5DAE0;
+  --well:#191D21;
+  --well-line:#2E353C;
+  --well-ink:#E6E9EC;
+  --well-ink-2:#8C949D;
+  --accent:#0E6E78;
+  --accent-soft:#DCEEF0;
+  --accent-ink:#FFFFFF;
+  --warn:#A8501C;
+  --warn-soft:#F7E9DE;
+  --track:#C9D0D7;
+  --focus:#0E6E78;
+  --shadow:0 1px 2px rgba(20,23,27,.06), 0 8px 24px rgba(20,23,27,.07);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101317;
+    --card:#181C21;
+    --ink:#E7EAEE;
+    --ink-2:#98A1AC;
+    --ink-3:#6E7783;
+    --line:#272D34;
+    --well:#0B0D10;
+    --well-line:#22272D;
+    --well-ink:#E7EAEE;
+    --well-ink-2:#7E8791;
+    --accent:#3FA8B4;
+    --accent-soft:#15302F;
+    --accent-ink:#06181B;
+    --warn:#D08A4E;
+    --warn-soft:#2A1E14;
+    --track:#2A3138;
+    --focus:#3FA8B4;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101317; --card:#181C21; --ink:#E7EAEE; --ink-2:#98A1AC; --ink-3:#6E7783;
+  --line:#272D34; --well:#0B0D10; --well-line:#22272D; --well-ink:#E7EAEE; --well-ink-2:#7E8791;
+  --accent:#3FA8B4; --accent-soft:#15302F; --accent-ink:#06181B; --warn:#D08A4E; --warn-soft:#2A1E14;
+  --track:#2A3138; --focus:#3FA8B4;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%}
+[hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:3px}
+
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 40px}
+
+/* ---------- header ---------- */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px;margin-bottom:18px}
+.mark{display:flex;align-items:baseline;gap:10px}
+.mark h1{
+  font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0;
+}
+.mark .sub{font-size:12.5px;color:var(--ink-2)}
+
+/* camera-style readout strip */
+.readout{
+  margin-left:auto;display:flex;flex-wrap:wrap;gap:2px;
+  background:var(--well);border:1px solid var(--well-line);border-radius:5px;
+  padding:7px 4px;
+}
+.ro{display:flex;align-items:baseline;gap:6px;padding:0 10px}
+.ro + .ro{border-left:1px solid var(--well-line)}
+.ro b{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px;font-weight:600;color:var(--well-ink);
+  font-variant-numeric:tabular-nums;
+}
+.ro span{
+  font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--well-ink-2);
+}
+
+/* ---------- layout ---------- */
+.cols{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){ .cols{grid-template-columns:1fr} .readout{margin-left:0;width:100%} }
+
+/* ---------- monitor well ---------- */
+.well{
+  background:var(--well);border:1px solid var(--well-line);border-radius:8px;
+  padding:14px;color:var(--well-ink);
+}
+.stage{
+  position:relative;background:
+    repeating-conic-gradient(#000 0% 25%, #141414 0% 50%) 50%/16px 16px;
+  border-radius:4px;overflow:hidden;
+  aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+}
+.stage.tall{aspect-ratio:auto;min-height:220px}
+.stage video,.stage img,.stage canvas{max-width:100%;max-height:420px;display:block;object-fit:contain}
+.dropnote{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;text-align:center;padding:24px;pointer-events:none;
+}
+.dropnote strong{font-size:15px;font-weight:600;color:var(--well-ink)}
+.dropnote em{font-style:normal;font-size:12.5px;color:var(--well-ink-2);max-width:34ch;line-height:1.55}
+body.dragging .stage{outline:2px dashed var(--accent);outline-offset:-6px}
+
+.striptitle{
+  display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  margin:14px 2px 8px;
+}
+.striptitle h2{
+  font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--well-ink-2);margin:0;
+}
+.striptitle .hint{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;color:var(--well-ink-2);
+  font-variant-numeric:tabular-nums;
+}
+
+/* trim track */
+.trim{padding:2px 2px 4px}
+.trimtrack{
+  position:relative;height:10px;border-radius:2px;background:#2A3138;overflow:hidden;margin:6px 0 10px;
+}
+.trimfill{position:absolute;top:0;bottom:0;background:var(--accent);opacity:.85}
+.trimrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;margin-bottom:8px}
+.trimrow label{
+  font-size:9.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--well-ink-2);
+  width:22px;
+}
+.trimrow output{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;color:var(--well-ink);
+  font-variant-numeric:tabular-nums;min-width:56px;text-align:right;
+}
+
+/* thumbnails for image sequences */
+.thumbs{display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow-y:auto;padding:2px}
+.thumb{position:relative;width:64px;height:64px;border-radius:3px;overflow:hidden;background:#000;flex:none}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb button{
+  position:absolute;top:2px;right:2px;width:17px;height:17px;border-radius:50%;
+  border:none;background:rgba(0,0,0,.72);color:#fff;font-size:11px;line-height:1;
+  cursor:pointer;display:grid;place-items:center;padding:0;
+}
+.thumb button:hover{background:var(--warn)}
+.thumb .n{
+  position:absolute;left:2px;bottom:1px;font-family:"IBM Plex Mono",monospace;font-size:9px;
+  color:#fff;text-shadow:0 1px 2px #000;
+}
+
+/* ---------- controls ---------- */
+.panel{
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  box-shadow:var(--shadow);padding:16px 16px 18px;
+}
+.panel + .panel{margin-top:14px}
+.panel > h2{
+  font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 12px;
+}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field > label, .flabel{
+  display:block;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;
+}
+.field .note{font-size:11.5px;color:var(--ink-2);margin-top:5px;line-height:1.45}
+
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{
+  font:inherit;font-size:12px;font-weight:500;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;
+  padding:6px 11px;border-radius:4px;border:1px solid var(--line);
+  background:transparent;color:var(--ink-2);cursor:pointer;
+}
+.seg button:hover{border-color:var(--accent);color:var(--ink)}
+.seg button[aria-pressed="true"]{
+  background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;
+}
+
+.toggles{display:flex;flex-direction:column;gap:9px}
+.tog{display:flex;align-items:flex-start;gap:9px;cursor:pointer}
+.tog input{margin:2px 0 0;accent-color:var(--accent);width:15px;height:15px;flex:none}
+.tog span{font-size:12.5px;color:var(--ink)}
+.tog small{display:block;font-size:11.5px;color:var(--ink-2);line-height:1.45}
+
+input[type="range"]{width:100%;accent-color:var(--accent);background:transparent}
+input[type="number"]{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;
+  padding:6px 8px;border:1px solid var(--line);border-radius:4px;
+  background:var(--paper);color:var(--ink);width:88px;font-variant-numeric:tabular-nums;
+}
+
+.filebtn{
+  display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:13px;font-weight:600;
+  padding:9px 14px;border-radius:5px;border:1px solid var(--line);
+  background:var(--paper);color:var(--ink);cursor:pointer;width:100%;justify-content:center;
+}
+.filebtn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ---------- action bar ---------- */
+.actions{
+  margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:8px;
+  box-shadow:var(--shadow);padding:16px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;
+}
+@media (max-width:700px){ .actions{grid-template-columns:1fr;text-align:left} }
+.render{
+  font:inherit;font-size:14px;font-weight:700;letter-spacing:.01em;
+  padding:12px 26px;border-radius:5px;border:none;
+  background:var(--accent);color:var(--accent-ink);cursor:pointer;
+}
+.render:hover{filter:brightness(1.08)}
+.render:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.status{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+.bar{height:4px;border-radius:2px;background:var(--track);overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+@media (prefers-reduced-motion:reduce){ .bar i{transition:none} }
+.dl{
+  font:inherit;font-size:13px;font-weight:700;text-decoration:none;
+  padding:11px 20px;border-radius:5px;border:1px solid var(--accent);
+  color:var(--accent);background:transparent;display:inline-block;
+}
+.dl:hover{background:var(--accent);color:var(--accent-ink)}
+
+.flag{
+  margin-top:12px;padding:10px 12px;border-radius:5px;font-size:12.5px;line-height:1.5;
+  background:var(--warn-soft);color:var(--warn);border:1px solid color-mix(in srgb, var(--warn) 30%, transparent);
+}
+.foot{
+  margin-top:22px;font-size:11.5px;color:var(--ink-3);line-height:1.6;max-width:68ch;
+}
+.foot code{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;
+  background:var(--card);border:1px solid var(--line);border-radius:3px;padding:1px 5px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="mark">
+      <h1>Sprocket</h1>
+      <span class="sub">Video and stills into a GIF. Runs entirely on this machine.</span>
+    </div>
+    <div class="readout" id="readout" aria-live="polite">
+      <div class="ro"><span>Frames</span><b id="roFrames">12</b></div>
+      <div class="ro"><span>FPS</span><b id="roFps">12</b></div>
+      <div class="ro"><span>Size</span><b id="roSize">240&times;240</b></div>
+      <div class="ro"><span>Colors</span><b id="roColors">128</b></div>
+      <div class="ro"><span>Output</span><b id="roOut">&mdash;</b></div>
+    </div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ LEFT: the monitor ============ -->
+    <section class="well" aria-label="Preview">
+      <div class="stage" id="stage">
+        <img id="preview" alt="GIF preview" hidden>
+        <video id="video" hidden playsinline muted></video>
+        <div class="dropnote" id="dropnote" hidden>
+          <strong>Drop a clip or some photos here</strong>
+          <em>MP4 and MOV, or a batch of JPG and PNG stills. Live Photos work too: use the .MP4 file, not the .HEIC.</em>
+        </div>
+      </div>
+
+      <!-- video trim -->
+      <div id="trimBlock" hidden>
+        <div class="striptitle">
+          <h2>Trim</h2>
+          <span class="hint" id="trimHint">0.00 &ndash; 0.00 s</span>
+        </div>
+        <div class="trim">
+          <div class="trimtrack"><div class="trimfill" id="trimFill"></div></div>
+          <div class="trimrow">
+            <label for="inT">In</label>
+            <input type="range" id="inT" min="0" max="100" step="0.01" value="0">
+            <output id="inOut">0.00s</output>
+          </div>
+          <div class="trimrow">
+            <label for="outT">Out</label>
+            <input type="range" id="outT" min="0" max="100" step="0.01" value="100">
+            <output id="outOut">0.00s</output>
+          </div>
+        </div>
+      </div>
+
+      <!-- image sequence -->
+      <div id="seqBlock" hidden>
+        <div class="striptitle">
+          <h2>Frames</h2>
+          <span class="hint" id="seqHint">0 stills</span>
+        </div>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+    </section>
+
+    <!-- ============ RIGHT: controls ============ -->
+    <div>
+      <section class="panel">
+        <h2>Source</h2>
+        <div class="field">
+          <button class="filebtn" id="pick" type="button">Choose a clip or photos</button>
+          <input type="file" id="file" accept="video/*,image/*" multiple hidden>
+          <p class="note" id="srcNote">Showing a sample countdown leader so you can see it working. Drop your own files to replace it.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Output</h2>
+
+        <div class="field">
+          <span class="flabel" id="lblW">Width</span>
+          <div class="seg" role="group" aria-labelledby="lblW" id="segW"></div>
+          <p class="note">Height follows the source. Wider means a bigger file, fast.</p>
+        </div>
+
+        <div class="field">
+          <span class="flabel" id="lblF">Frame rate</span>
+          <div class="seg" role="group" aria-labelledby="lblF" id="segF"></div>
+          <p class="note">10 to 12 is plenty for most clips. GIF delays round to 1/100s, so very high rates drift.</p>
+        </div>
+
+        <div class="field">
+          <span class="flabel" id="lblC">Colors</span>
+          <div class="seg" role="group" aria-labelledby="lblC" id="segC"></div>
+        </div>
+
+        <div class="field">
+          <span class="flabel">Options</span>
+          <div class="toggles">
+            <label class="tog"><input type="checkbox" id="optDither">
+              <span>Dither<small>Smoother gradients at low color counts. Costs file size.</small></span></label>
+            <label class="tog"><input type="checkbox" id="optPing">
+              <span>Ping-pong<small>Play forward then backward. Hides the cut on a short loop.</small></span></label>
+            <label class="tog"><input type="checkbox" id="optLoop" checked>
+              <span>Loop forever<small>Off means it plays once and stops.</small></span></label>
+          </div>
+        </div>
+
+        <div class="field" id="speedField" hidden>
+          <span class="flabel" id="lblS">Speed</span>
+          <div class="seg" role="group" aria-labelledby="lblS" id="segS"></div>
+          <p class="note">Slower means more frames from the same clip.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ action bar ============ -->
+  <div class="actions">
+    <button class="render" id="render" type="button">Make GIF</button>
+    <div>
+      <div class="status" id="status">Sample loaded. Drop your own clip to start.</div>
+      <div class="bar"><i id="barFill"></i></div>
+    </div>
+    <a class="dl" id="download" download="sprocket.gif" hidden>Download GIF</a>
+  </div>
+
+  <div id="flag" class="flag" hidden></div>
+
+  <p class="foot">
+    Everything happens in this browser tab. No upload, no account, no service that can go down.
+    Save this file anywhere and double-click it. If a <code>.MOV</code> will not load, it is the
+    codec: re-save it as H.264 MP4, or drop the stills instead.
+  </p>
+</div>
+
+<script>
+/* ==========================================================================
+   GIF89a encoder: median-cut quantization, Floyd-Steinberg dither, LZW.
+   Self-contained on purpose. No library, no CDN, works offline forever.
+   ========================================================================== */
+function buildHistogram(rgba){
+  const m = new Map();
+  for(let i=0;i<rgba.length;i+=4){
+    const k = (rgba[i]<<16)|(rgba[i+1]<<8)|rgba[i+2];
+    const e = m.get(k);
+    if(e) e.count++; else m.set(k,{r:rgba[i],g:rgba[i+1],b:rgba[i+2],count:1});
+  }
+  return [...m.values()];
+}
+
+function medianCut(hist, maxColors){
+  const shrink = b => {
+    let rm=255,rM=0,gm=255,gM=0,bm=255,bM=0,n=0;
+    for(const e of b.c){
+      if(e.r<rm)rm=e.r; if(e.r>rM)rM=e.r;
+      if(e.g<gm)gm=e.g; if(e.g>gM)gM=e.g;
+      if(e.b<bm)bm=e.b; if(e.b>bM)bM=e.b;
+      n+=e.count;
+    }
+    b.span = Math.max(rM-rm, gM-gm, bM-bm);
+    b.axis = (rM-rm >= gM-gm && rM-rm >= bM-bm) ? 'r' : ((gM-gm >= bM-bm) ? 'g' : 'b');
+    b.n = n;
+    return b;
+  };
+  let boxes = [shrink({c:hist})];
+  while(boxes.length < maxColors){
+    let bi=-1, best=-1;
+    for(let i=0;i<boxes.length;i++){
+      const b = boxes[i];
+      if(b.c.length < 2) continue;
+      const score = b.span * Math.cbrt(b.n);
+      if(score > best){ best = score; bi = i; }
+    }
+    if(bi < 0) break;
+    const b = boxes[bi], ax = b.axis;
+    b.c.sort((x,y)=> x[ax]-y[ax]);
+    const half = b.n/2;
+    let acc=0, cut=0;
+    for(let i=0;i<b.c.length;i++){ acc += b.c[i].count; if(acc >= half){ cut = i; break; } }
+    if(cut >= b.c.length-1) cut = b.c.length-2;
+    if(cut < 0) break;
+    const left = {c:b.c.slice(0,cut+1)}, right = {c:b.c.slice(cut+1)};
+    if(!left.c.length || !right.c.length) break;
+    boxes.splice(bi,1, shrink(left), shrink(right));
+  }
+  return boxes.map(b=>{
+    let r=0,g=0,bl=0,n=0;
+    for(const e of b.c){ r+=e.r*e.count; g+=e.g*e.count; bl+=e.b*e.count; n+=e.count; }
+    return [Math.round(r/n), Math.round(g/n), Math.round(bl/n)];
+  });
+}
+
+function quantize(rgba, palette, dither, w, h){
+  const n = palette.length;
+  const cache = new Int16Array(32768).fill(-1);
+  const nearest = (r,g,b) => {
+    const ck = ((r>>3)<<10) | ((g>>3)<<5) | (b>>3);
+    const hit = cache[ck];
+    if(hit >= 0) return hit;
+    let bi=0, bd=Infinity;
+    for(let i=0;i<n;i++){
+      const p = palette[i];
+      const dr=r-p[0], dg=g-p[1], db=b-p[2];
+      const d = dr*dr*0.299 + dg*dg*0.587 + db*db*0.114;
+      if(d < bd){ bd = d; bi = i; }
+    }
+    cache[ck] = bi;
+    return bi;
+  };
+  const out = new Uint8Array(w*h);
+  if(!dither){
+    for(let i=0,p=0;i<out.length;i++,p+=4) out[i] = nearest(rgba[p],rgba[p+1],rgba[p+2]);
+    return out;
+  }
+  const buf = new Float32Array(w*h*3);
+  for(let i=0,p=0;i<w*h;i++,p+=4){ buf[i*3]=rgba[p]; buf[i*3+1]=rgba[p+1]; buf[i*3+2]=rgba[p+2]; }
+  const cl = v => v<0?0:v>255?255:v;
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i=y*w+x, o=i*3;
+      const idx = nearest(cl(buf[o]|0), cl(buf[o+1]|0), cl(buf[o+2]|0));
+      out[i] = idx;
+      const p = palette[idx];
+      const er=buf[o]-p[0], eg=buf[o+1]-p[1], eb=buf[o+2]-p[2];
+      const add = (xx,yy,f)=>{
+        if(xx<0||xx>=w||yy>=h) return;
+        const q=(yy*w+xx)*3;
+        buf[q]+=er*f; buf[q+1]+=eg*f; buf[q+2]+=eb*f;
+      };
+      add(x+1,y,7/16); add(x-1,y+1,3/16); add(x,y+1,5/16); add(x+1,y+1,1/16);
+    }
+  }
+  return out;
+}
+
+function lzw(minCodeSize, data){
+  const out=[]; let bitBuf=0, bitCnt=0;
+  const CLEAR = 1<<minCodeSize, EOI = CLEAR+1;
+  let codeSize = minCodeSize+1, next = EOI+1;
+  let dict = new Map();
+  const emit = c => {
+    bitBuf |= c<<bitCnt; bitCnt += codeSize;
+    while(bitCnt >= 8){ out.push(bitBuf & 255); bitBuf >>>= 8; bitCnt -= 8; }
+  };
+  emit(CLEAR);
+  let cur = data[0];
+  for(let i=1;i<data.length;i++){
+    const k = data[i], key = (cur<<8)|k, f = dict.get(key);
+    if(f !== undefined){ cur = f; continue; }
+    emit(cur);
+    if(next < 4096){
+      dict.set(key, next); next++;
+      if(next > (1<<codeSize) && codeSize < 12) codeSize++;
+    } else {
+      emit(CLEAR); dict = new Map(); next = EOI+1; codeSize = minCodeSize+1;
+    }
+    cur = k;
+  }
+  emit(cur); emit(EOI);
+  if(bitCnt > 0) out.push(bitBuf & 255);
+  return out;
+}
+
+class Sink{
+  constructor(){ this.a=[]; }
+  u8(v){ this.a.push(v&255); }
+  u16(v){ this.a.push(v&255,(v>>8)&255); }
+  str(s){ for(const ch of s) this.a.push(ch.charCodeAt(0)); }
+  blocks(b){
+    let i=0;
+    while(i < b.length){
+      const n = Math.min(255, b.length-i);
+      this.u8(n);
+      for(let j=0;j<n;j++) this.a.push(b[i+j]);
+      i += n;
+    }
+    this.u8(0);
+  }
+  out(){ return new Uint8Array(this.a); }
+}
+
+function gifHeader(w,h,loop){
+  const s = new Sink();
+  s.str('GIF89a'); s.u16(w); s.u16(h); s.u8(0x70); s.u8(0); s.u8(0);
+  s.u8(0x21); s.u8(0xFF); s.u8(11); s.str('NETSCAPE2.0');
+  s.u8(3); s.u8(1); s.u16(loop); s.u8(0);
+  return s.out();
+}
+function gifFrame(rgba, w, h, delayMs, maxColors, dither){
+  const s = new Sink();
+  const hist = buildHistogram(rgba);
+  const pal = hist.length <= maxColors ? hist.map(e=>[e.r,e.g,e.b]) : medianCut(hist, maxColors);
+  let bits = 1; while((1<<bits) < pal.length) bits++;
+  bits = Math.min(8, Math.max(1, bits));
+  const tableLen = 1<<bits;
+  const idx = quantize(rgba, pal, dither, w, h);
+  const delay = Math.max(2, Math.round(delayMs/10));
+  s.u8(0x21); s.u8(0xF9); s.u8(4); s.u8(0x04); s.u16(delay); s.u8(0); s.u8(0);
+  s.u8(0x2C); s.u16(0); s.u16(0); s.u16(w); s.u16(h); s.u8(0x80|(bits-1));
+  for(let i=0;i<tableLen;i++){
+    const p = pal[i] || [0,0,0];
+    s.u8(p[0]); s.u8(p[1]); s.u8(p[2]);
+  }
+  const mcs = Math.max(2, bits);
+  s.u8(mcs);
+  s.blocks(lzw(mcs, idx));
+  return s.out();
+}
+
+/* ==========================================================================
+   App
+   ========================================================================== */
+const $ = id => document.getElementById(id);
+const stage=$('stage'), preview=$('preview'), video=$('video'), dropnote=$('dropnote');
+const statusEl=$('status'), barFill=$('barFill'), renderBtn=$('render'), download=$('download');
+const flag=$('flag');
+
+const opts = { width:240, fps:12, colors:128, dither:false, ping:false, loop:true, speed:1 };
+const state = { mode:'sample', images:[], names:[], dur:0, inT:0, outT:0, url:null, resultURL:null };
+
+/* --- settings remembered per browser, never required --- */
+function saveOpts(){ try{ localStorage.setItem('sprocket.opts', JSON.stringify(opts)); }catch(e){} }
+function loadOpts(){
+  try{
+    const raw = localStorage.getItem('sprocket.opts');
+    if(raw) Object.assign(opts, JSON.parse(raw));
+  }catch(e){}
+}
+
+/* --- segmented controls --- */
+function segment(host, values, key, fmt){
+  host.innerHTML = '';
+  values.forEach(v=>{
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = fmt ? fmt(v) : v;
+    b.setAttribute('aria-pressed', String(opts[key] === v));
+    b.addEventListener('click', ()=>{
+      opts[key] = v;
+      [...host.children].forEach(c=>c.setAttribute('aria-pressed', String(c === b)));
+      saveOpts(); refreshReadout();
+    });
+    host.appendChild(b);
+  });
+}
+
+function refreshReadout(){
+  const n = plannedFrames();
+  $('roFrames').textContent = n;
+  $('roFps').textContent = opts.fps;
+  const dims = plannedDims();
+  $('roSize').textContent = dims ? dims.w + '×' + dims.h : '—';
+  $('roColors').textContent = opts.colors;
+}
+
+function plannedDims(){
+  let sw=0, sh=0;
+  if(state.mode === 'video' && video.videoWidth){ sw = video.videoWidth; sh = video.videoHeight; }
+  else if(state.images.length){ sw = state.images[0].width; sh = state.images[0].height; }
+  else return {w:opts.width, h:opts.width};
+  const w = Math.max(2, Math.round(opts.width/2)*2);
+  const h = Math.max(2, Math.round(w * sh/sw /2)*2);
+  return {w,h};
+}
+
+function plannedFrames(){
+  let n;
+  if(state.mode === 'video'){
+    const span = Math.max(0, (state.outT - state.inT)) / opts.speed;
+    n = Math.max(1, Math.min(300, Math.round(span * opts.fps)));
+  } else if(state.images.length){
+    n = state.images.length;
+  } else {
+    n = 12;
+  }
+  return opts.ping && n > 2 ? n*2 - 2 : n;
+}
+
+function setStatus(t){ statusEl.textContent = t; }
+function setBar(p){ barFill.style.width = Math.round(p*100) + '%'; }
+function showFlag(msg){ flag.textContent = msg; flag.hidden = false; }
+function clearFlag(){ flag.hidden = true; }
+
+/* --- draw one source into the target frame, cover-cropped --- */
+function drawCover(ctx, src, sw, sh, w, h){
+  const scale = Math.max(w/sw, h/sh);
+  const dw = sw*scale, dh = sh*scale;
+  ctx.drawImage(src, (w-dw)/2, (h-dh)/2, dw, dh);
+}
+
+function seek(v, t){
+  return new Promise(res=>{
+    let done = false;
+    const on = ()=>{ if(done) return; done = true; v.removeEventListener('seeked', on); res(); };
+    v.addEventListener('seeked', on);
+    try{ v.currentTime = t; }catch(e){ on(); }
+    setTimeout(on, 500);
+  });
+}
+const yieldUI = ()=> new Promise(r=>setTimeout(r,0));
+
+/* --- gather the RGBA frames the encoder will eat --- */
+async function collectFrames(w, h, onProgress){
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d', {willReadFrequently:true});
+  const frames = [];
+
+  if(state.mode === 'video'){
+    const span = Math.max(0.04, state.outT - state.inT);
+    const count = Math.max(1, Math.min(300, Math.round(span/opts.speed * opts.fps)));
+    for(let i=0;i<count;i++){
+      const t = state.inT + (span * i / count);
+      await seek(video, Math.min(t, state.dur - 0.001));
+      ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
+      drawCover(ctx, video, video.videoWidth, video.videoHeight, w, h);
+      frames.push(ctx.getImageData(0,0,w,h).data);
+      onProgress((i+1)/count * 0.45);
+      if(i % 4 === 3) await yieldUI();
+    }
+  } else {
+    const list = state.images;
+    for(let i=0;i<list.length;i++){
+      ctx.fillStyle = '#000'; ctx.fillRect(0,0,w,h);
+      drawCover(ctx, list[i], list[i].width, list[i].height, w, h);
+      frames.push(ctx.getImageData(0,0,w,h).data);
+      onProgress((i+1)/list.length * 0.45);
+      if(i % 4 === 3) await yieldUI();
+    }
+  }
+
+  if(opts.ping && frames.length > 2){
+    for(let i = frames.length-2; i > 0; i--) frames.push(frames[i]);
+  }
+  return frames;
+}
+
+async function makeGif(){
+  clearFlag();
+  renderBtn.disabled = true;
+  download.hidden = true;
+  const {w,h} = plannedDims();
+  const delay = 1000/opts.fps;
+  try{
+    // a video must stay on screen while we seek it, or it may not paint into the canvas
+    if(state.mode === 'video'){ video.hidden = false; preview.hidden = true; }
+    setStatus('Reading frames…'); setBar(0);
+    const frames = await collectFrames(w, h, p=>setBar(p));
+    if(!frames.length) throw new Error('No frames to encode.');
+
+    const parts = [gifHeader(w, h, opts.loop ? 0 : 1)];
+    for(let i=0;i<frames.length;i++){
+      setStatus('Encoding frame ' + (i+1) + ' of ' + frames.length + '…');
+      parts.push(gifFrame(frames[i], w, h, delay, opts.colors, opts.dither));
+      setBar(0.45 + 0.55*(i+1)/frames.length);
+      await yieldUI();
+    }
+    parts.push(new Uint8Array([0x3B]));
+
+    const blob = new Blob(parts, {type:'image/gif'});
+    if(state.resultURL) URL.revokeObjectURL(state.resultURL);
+    state.resultURL = URL.createObjectURL(blob);
+
+    video.hidden = true;
+    preview.hidden = false;
+    preview.src = state.resultURL;
+    stage.classList.remove('tall');
+    dropnote.hidden = true;
+
+    const mb = blob.size/1048576;
+    $('roOut').textContent = mb < 1 ? Math.round(blob.size/1024) + ' KB' : mb.toFixed(2) + ' MB';
+    download.href = state.resultURL;
+    download.hidden = false;
+    setStatus('Done. ' + frames.length + ' frames, ' + w + '×' + h + '.');
+    setBar(1);
+    if(mb > 8) showFlag('That file is ' + mb.toFixed(1) + ' MB. Most places cap GIFs well below that. Drop the width to 320, or the frame rate to 10, and make it again.');
+  }catch(err){
+    setStatus('Could not finish.');
+    setBar(0);
+    showFlag(err && err.message ? err.message : 'Something went wrong reading that file.');
+  }finally{
+    renderBtn.disabled = false;
+  }
+}
+
+/* --- loading files --- */
+async function loadVideo(file){
+  if(state.url) URL.revokeObjectURL(state.url);
+  state.url = URL.createObjectURL(file);
+  state.mode = 'video';
+  state.images = [];
+  video.src = state.url;
+  video.hidden = false;
+  preview.hidden = true;
+  stage.classList.remove('tall');
+  dropnote.hidden = true;
+
+  if(video.readyState < 1) await new Promise((res, rej)=>{
+    const ok = ()=>{ cleanup(); res(); };
+    const bad = ()=>{ cleanup(); rej(new Error('This browser cannot decode that video. Re-save it as an H.264 MP4, or drop the stills instead.')); };
+    const cleanup = ()=>{
+      video.removeEventListener('loadedmetadata', ok);
+      video.removeEventListener('error', bad);
+    };
+    video.addEventListener('loadedmetadata', ok);
+    video.addEventListener('error', bad);
+  });
+
+  if(!video.videoWidth) throw new Error('That file has no video track this browser can read.');
+  state.dur = isFinite(video.duration) ? video.duration : 0;
+  if(!state.dur){
+    await seek(video, 1e6);
+    state.dur = isFinite(video.duration) ? video.duration : 3;
+  }
+  state.inT = 0;
+  state.outT = Math.min(state.dur, 6);
+  $('inT').max = $('outT').max = state.dur.toFixed(2);
+  $('inT').value = 0;
+  $('outT').value = state.outT;
+  $('trimBlock').hidden = false;
+  $('seqBlock').hidden = true;
+  $('speedField').hidden = false;
+  await seek(video, 0);
+  updateTrim();
+  $('srcNote').textContent = file.name + ' · ' + state.dur.toFixed(2) + 's · ' + video.videoWidth + '×' + video.videoHeight;
+  if(state.dur > 6) showFlag('Loaded ' + state.dur.toFixed(1) + 's and trimmed it to the first 6. Drag the In and Out handles for the part you want.');
+}
+
+async function loadImages(files){
+  const imgs = [], failed = [];
+  const sorted = [...files].sort((a,b)=> a.name.localeCompare(b.name, undefined, {numeric:true}));
+  for(const f of sorted){
+    try{
+      const bmp = await createImageBitmap(f);
+      bmp.name = f.name;
+      imgs.push(bmp);
+    }catch(e){ failed.push(f.name); }
+  }
+  if(!imgs.length) throw new Error('None of those images could be opened here. HEIC does not decode in most browsers: export them as JPG first.');
+  state.mode = 'images';
+  state.images = imgs;
+  video.hidden = true;
+  preview.hidden = true;
+  stage.classList.add('tall');
+  dropnote.hidden = false;
+  dropnote.querySelector('strong').textContent = imgs.length + ' stills ready';
+  dropnote.querySelector('em').textContent = 'Press Make GIF. Remove any frame from the strip below.';
+  $('trimBlock').hidden = true;
+  $('speedField').hidden = true;
+  $('seqBlock').hidden = false;
+  renderThumbs();
+  $('srcNote').textContent = imgs.length + ' stills · ' + imgs[0].width + '×' + imgs[0].height + ' source';
+  if(failed.length) showFlag('Skipped ' + failed.length + ' file' + (failed.length>1?'s':'') + ' this browser cannot read: ' + failed.slice(0,3).join(', ') + (failed.length>3?'…':'') + '. Export those as JPG or PNG.');
+  refreshReadout();
+}
+
+function renderThumbs(){
+  const host = $('thumbs');
+  host.innerHTML = '';
+  state.images.forEach((bmp, i)=>{
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    const cx = c.getContext('2d');
+    drawCover(cx, bmp, bmp.width, bmp.height, 64, 64);
+    const d = document.createElement('div');
+    d.className = 'thumb';
+    const im = document.createElement('img');
+    im.src = c.toDataURL('image/jpeg', 0.7);
+    im.alt = bmp.name || ('Frame ' + (i+1));
+    const n = document.createElement('span');
+    n.className = 'n'; n.textContent = i+1;
+    const x = document.createElement('button');
+    x.type = 'button'; x.textContent = '×';
+    x.title = 'Remove this frame';
+    x.setAttribute('aria-label', 'Remove frame ' + (i+1));
+    x.addEventListener('click', ()=>{
+      state.images.splice(i,1);
+      renderThumbs(); refreshReadout();
+      if(!state.images.length){ $('seqBlock').hidden = true; loadSample(); }
+    });
+    d.append(im, n, x);
+    host.appendChild(d);
+  });
+  $('seqHint').textContent = state.images.length + ' still' + (state.images.length===1?'':'s');
+}
+
+async function handleFiles(files){
+  clearFlag();
+  if(!files || !files.length) return;
+  const vid = [...files].find(f=> f.type.startsWith('video/') || /\.(mp4|mov|m4v|webm)$/i.test(f.name));
+  try{
+    if(vid){ await loadVideo(vid); }
+    else { await loadImages(files); }
+    refreshReadout();
+    setStatus('Ready. Press Make GIF.');
+    setBar(0);
+    download.hidden = true;
+    $('roOut').textContent = '—';
+    download.download = (vid ? vid.name.replace(/\.[^.]+$/,'') : 'sequence') + '.gif';
+  }catch(err){
+    showFlag(err.message);
+    setStatus('Nothing loaded.');
+  }
+}
+
+function updateTrim(){
+  if(state.mode === 'video'){ video.hidden = false; preview.hidden = true; }
+  let a = parseFloat($('inT').value), b = parseFloat($('outT').value);
+  if(a > b - 0.05) a = Math.max(0, b - 0.05);
+  state.inT = a; state.outT = b;
+  $('inT').value = a;
+  $('inOut').textContent = a.toFixed(2) + 's';
+  $('outOut').textContent = b.toFixed(2) + 's';
+  $('trimHint').textContent = a.toFixed(2) + ' – ' + b.toFixed(2) + ' s';
+  const L = state.dur || 1;
+  $('trimFill').style.left = (a/L*100) + '%';
+  $('trimFill').style.width = ((b-a)/L*100) + '%';
+  refreshReadout();
+}
+
+/* --- the sample: an Academy-style countdown leader --- */
+async function loadSample(){
+  const S = 240, imgs = [];
+  for(let f=0; f<12; f++){
+    const c = document.createElement('canvas');
+    c.width = S; c.height = S;
+    const x = c.getContext('2d');
+    const num = 3 - Math.floor(f/4);
+    const t = (f%4)/4;
+    x.fillStyle = '#0B0D10'; x.fillRect(0,0,S,S);
+    x.strokeStyle = '#2E353C'; x.lineWidth = 1;
+    x.beginPath(); x.moveTo(S/2,0); x.lineTo(S/2,S); x.moveTo(0,S/2); x.lineTo(S,S/2); x.stroke();
+    x.beginPath(); x.arc(S/2,S/2,S*0.42,0,Math.PI*2); x.stroke();
+    x.beginPath(); x.arc(S/2,S/2,S*0.30,0,Math.PI*2); x.stroke();
+    x.save();
+    x.beginPath(); x.moveTo(S/2,S/2);
+    x.arc(S/2, S/2, S*0.46, -Math.PI/2, -Math.PI/2 + t*Math.PI*2);
+    x.closePath();
+    x.fillStyle = 'rgba(63,168,180,0.16)'; x.fill();
+    x.restore();
+    x.strokeStyle = '#3FA8B4'; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(S/2,S/2);
+    x.lineTo(S/2 + Math.cos(-Math.PI/2 + t*Math.PI*2)*S*0.46,
+             S/2 + Math.sin(-Math.PI/2 + t*Math.PI*2)*S*0.46);
+    x.stroke();
+    x.fillStyle = '#E7EAEE';
+    x.font = '700 ' + Math.round(S*0.42) + 'px "Archivo", Helvetica, Arial, sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(String(num), S/2, S/2 + S*0.02);
+    x.fillStyle = '#7E8791';
+    x.font = '600 11px "IBM Plex Mono", monospace';
+    x.textAlign = 'left';
+    x.fillText('SPROCKET', 12, 16);
+    x.textAlign = 'right';
+    x.fillText('FRAME ' + String(f+1).padStart(2,'0'), S-12, 16);
+    const bmp = await createImageBitmap(c);
+    bmp.name = 'leader_' + String(f+1).padStart(2,'0');
+    imgs.push(bmp);
+  }
+  state.mode = 'images';
+  state.images = imgs;
+  $('seqBlock').hidden = false;
+  $('trimBlock').hidden = true;
+  $('speedField').hidden = true;
+  renderThumbs();
+  refreshReadout();
+}
+
+/* --- wiring --- */
+loadOpts();
+segment($('segW'), [240,320,480,640], 'width');
+segment($('segF'), [8,10,12,15,20], 'fps');
+segment($('segC'), [32,64,128,256], 'colors');
+segment($('segS'), [0.5,1,1.5,2], 'speed', v=> v + '×');
+$('optDither').checked = opts.dither;
+$('optPing').checked = opts.ping;
+$('optLoop').checked = opts.loop;
+$('optDither').addEventListener('change', e=>{ opts.dither = e.target.checked; saveOpts(); });
+$('optPing').addEventListener('change', e=>{ opts.ping = e.target.checked; saveOpts(); refreshReadout(); });
+$('optLoop').addEventListener('change', e=>{ opts.loop = e.target.checked; saveOpts(); });
+
+$('pick').addEventListener('click', ()=> $('file').click());
+$('file').addEventListener('change', e=> handleFiles(e.target.files));
+$('inT').addEventListener('input', updateTrim);
+$('outT').addEventListener('input', ()=>{ updateTrim(); seek(video, state.outT); });
+$('inT').addEventListener('change', ()=> seek(video, state.inT));
+renderBtn.addEventListener('click', makeGif);
+
+['dragenter','dragover'].forEach(ev=> document.addEventListener(ev, e=>{
+  e.preventDefault(); document.body.classList.add('dragging');
+}));
+['dragleave','drop'].forEach(ev=> document.addEventListener(ev, e=>{
+  e.preventDefault();
+  if(ev === 'drop' || e.relatedTarget === null) document.body.classList.remove('dragging');
+}));
+document.addEventListener('drop', e=>{
+  if(e.dataTransfer && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+
+/* boot with something working on screen */
+(async ()=>{
+  await loadSample();
+  await makeGif();
+  setStatus('Sample leader. Drop your own clip or stills to replace it.');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/", "destination": "/sprocket-gif-maker.html" }]
+}
